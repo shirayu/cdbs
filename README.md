@@ -17,6 +17,11 @@ Usage of ./at2pt:
 ## INSTALL
 
 ```
+go get github.com/shirayu/cdbs/cmd/cdbs
+```
+
+- To install library
+```
 go get github.com/shirayu/cdbs
 ```
 
