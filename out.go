@@ -45,6 +45,8 @@ func Output(r *bufio.Reader, outpath string) {
 		}
 		items := strings.SplitN(line[:len(line)-1], "\t", 2)
 		if len(items) != 2 {
+			log.Printf("skip an invalid line -> %s", line)
+			line, err = r.ReadString('\n') //next
 			continue
 		}
 
@@ -69,7 +71,7 @@ func Output(r *bufio.Reader, outpath string) {
 			buf = bytes.Buffer{}
 		}
 
-		line, err = r.ReadString('\n') //netx
+		line, err = r.ReadString('\n') //next
 	}
 
 	rbuf := bufio.NewReader(&buf)
