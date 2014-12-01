@@ -57,19 +57,21 @@ func Output(r *bufio.Reader, outpath string) {
 		val := items[1]
 		cdb_line := fmt.Sprintf("+%d,%d:%s->%s\n", len(key), len(val), key, val)
 		cdb_line_byte := []byte(cdb_line)
-		buf_size += len(cdb_line_byte)
-		buf.Write(cdb_line_byte)
 
-		if buf_size > 3.5*(1024*1024*1024) { //3.5GB
+		//if the buffer size will exceed 3.5GB, make DB before adding the new line
+		if buf_size+len(cdb_line_byte) > 3.5*(1024*1024*1024) {
 			r := bufio.NewReader(&buf)
 			buf.WriteString("\n")
 			makeCDB(outpath, num_db, r)
 			num_db++
 
 			//clear
+			buf.Reset()
 			buf_size = 0
 			buf = bytes.Buffer{}
 		}
+		buf_size += len(cdb_line_byte)
+		buf.Write(cdb_line_byte)
 
 		line, err = r.ReadString('\n') //next
 	}
