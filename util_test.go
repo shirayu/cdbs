@@ -17,6 +17,11 @@ func TestGet(t *testing.T) {
 		value string
 	}{
 		{
+			arg:   " aaaa", //before the first key
+			err:   io.EOF,
+			value: "",
+		},
+		{
 			arg:   "aaaa",
 			err:   io.EOF,
 			value: "",

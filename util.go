@@ -54,6 +54,9 @@ func (self *Cdbs) Get(key string) ([]byte, error) {
 	} else if self.names[index] != key {
 		index--
 	}
+	if index < 0 {
+		index = 0
+	}
 
 	c := self.cdbs[index]
 	data, err := c.Data([]byte(key))
