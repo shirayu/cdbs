@@ -51,9 +51,6 @@ func Output(r *bufio.Reader, outpath string) {
 		}
 
 		key := items[0]
-		if buf_size == 0 {
-			first_keys = append(first_keys, key)
-		}
 		val := items[1]
 		cdb_line := fmt.Sprintf("+%d,%d:%s->%s\n", len(key), len(val), key, val)
 		cdb_line_byte := []byte(cdb_line)
@@ -69,6 +66,10 @@ func Output(r *bufio.Reader, outpath string) {
 			buf.Reset()
 			buf_size = 0
 			buf = bytes.Buffer{}
+		}
+
+		if buf_size == 0 {
+			first_keys = append(first_keys, key)
 		}
 		buf_size += len(cdb_line_byte)
 		buf.Write(cdb_line_byte)
