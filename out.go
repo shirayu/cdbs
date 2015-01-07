@@ -8,7 +8,6 @@ import (
 	"io"
 	"log"
 	"os"
-	"strings"
 )
 
 func exitOnErr(err error) {
@@ -35,46 +34,56 @@ func makeCDB(outprefix string, num_db int, r *bufio.Reader) {
 func Output(r *bufio.Reader, outpath string) {
 	var err error = nil
 	var buf bytes.Buffer
+	buf.Grow(4 * (1024 * 1024 * 1024)) //get 4GB
 	first_keys := []string{}
 	buf_size := 0
 	num_db := 0
-	line, err := r.ReadString('\n') //first
+	line, err := r.ReadBytes('\n') //first
 	for err != io.EOF {
 		if err != io.EOF && err != nil {
 			log.Fatal(err)
 		}
-		items := strings.SplitN(line[:len(line)-1], "\t", 2)
-		if len(items) != 2 {
+		delm_pos := bytes.IndexRune(line, '\t')
+		//         (line[:len(line)-1], "\t", 2)
+		if delm_pos == -1 {
 			log.Printf("skip an invalid line -> %s", line)
-			line, err = r.ReadString('\n') //next
+			line, err = r.ReadBytes('\n') //next
 			continue
 		}
 
-		key := items[0]
-		val := items[1]
-		cdb_line := fmt.Sprintf("+%d,%d:%s->%s\n", len(key), len(val), key, val)
-		cdb_line_byte := []byte(cdb_line)
+		//cdb line format is "+<Size-of-key>,<Size-of-val>:<key>-><val>\n" like "+3,4:tom->baby\n"
+		new_line_size := len(line) + 20 //+ , : =>
 
 		//if the buffer size will exceed 3.5GB, make DB before adding the new line
-		if buf_size+len(cdb_line_byte) > 3.5*(1024*1024*1024) {
+		if buf_size+new_line_size > 3.5*(1024*1024*1024) {
 			r := bufio.NewReader(&buf)
 			buf.WriteString("\n")
 			makeCDB(outpath, num_db, r)
 			num_db++
 
 			//clear
-			buf.Reset()
 			buf_size = 0
-			buf = bytes.Buffer{}
+			buf.Reset()
+			//             debug.FreeOSMemory()
 		}
 
 		if buf_size == 0 {
+			key := string(line[:delm_pos])
 			first_keys = append(first_keys, key)
 		}
-		buf_size += len(cdb_line_byte)
-		buf.Write(cdb_line_byte)
+		buf_size += new_line_size
 
-		line, err = r.ReadString('\n') //next
+		val_size := len(line) - delm_pos - 2
+		head_line := fmt.Sprintf("+%d,%d:", delm_pos, val_size)
+		buf.WriteString(head_line)
+		key_byte := line[:delm_pos]
+		buf.Write(key_byte)
+		buf.WriteRune('-')
+		buf.WriteRune('>')
+		val_and_ln_byte := line[delm_pos+1:]
+		buf.Write(val_and_ln_byte)
+
+		line, err = r.ReadBytes('\n') //next
 	}
 
 	rbuf := bufio.NewReader(&buf)
