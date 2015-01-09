@@ -9,7 +9,7 @@
 
 ## Usage
 ```
-Usage of ./at2pt:
+Usage of cdbs:
   -i, -input :  Input file name. - or no designation means STDIN.
   -o, -output: Output file name suffix.
 ```
