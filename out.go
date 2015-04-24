@@ -20,8 +20,7 @@ func get_cdb_name(outprefix string, num_db int) string {
 	return fmt.Sprintf("%s.%d.cdb", outprefix, num_db)
 }
 
-func makeCDB(outprefix string, num_db int, r *bufio.Reader) {
-	outname := get_cdb_name(outprefix, num_db)
+func MakeCDB(r *bufio.Reader, outname string) {
 	log.Printf("Making %s", outname)
 	outdb, err := os.OpenFile(outname, os.O_RDWR|os.O_CREATE, 0644)
 	exitOnErr(err)
@@ -58,7 +57,8 @@ func Output(r *bufio.Reader, outpath string) {
 		if buf_size+new_line_size > 3.5*(1024*1024*1024) {
 			r := bufio.NewReader(&buf)
 			buf.WriteString("\n")
-			makeCDB(outpath, num_db, r)
+			outname := get_cdb_name(outpath, num_db)
+			MakeCDB(r, outname)
 			num_db++
 
 			//clear
@@ -88,7 +88,8 @@ func Output(r *bufio.Reader, outpath string) {
 
 	rbuf := bufio.NewReader(&buf)
 	buf.WriteString("\n")
-	makeCDB(outpath, num_db, rbuf)
+	outname := get_cdb_name(outpath, num_db)
+	MakeCDB(rbuf, outname)
 
 	//output keymap
 	outf, err := os.Create(outpath + ".keymap")

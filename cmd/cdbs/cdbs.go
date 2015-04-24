@@ -26,6 +26,7 @@ type cmdOptions struct {
 	Help   bool   `short:"h" long:"help" description:"Show this help message"`
 	Input  string `short:"i" long:"input" default:"-"`
 	Output string `short:"o" long:"output"`
+	Single bool   `long:"single" description:"Only output a single CDB file" default:"false"`
 	Log    bool   `long:"log" description:"Enable logging" default:"false"`
 }
 
@@ -66,5 +67,9 @@ func main() {
 
 	//operate
 	r := bufio.NewReader(inf)
-	cdbs.Output(r, opts.Output)
+	if opts.Single {
+		cdbs.MakeCDB(r, opts.Output)
+	} else {
+		cdbs.Output(r, opts.Output)
+	}
 }
