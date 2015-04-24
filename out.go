@@ -3,6 +3,7 @@ package cdbs
 import (
 	"bufio"
 	"bytes"
+	"errors"
 	"fmt"
 	"github.com/jbarham/go-cdb"
 	"io"
@@ -16,7 +17,13 @@ func exitOnErr(err error) {
 	}
 }
 
-func get_cdb_name(outprefix string, num_db int) string {
+func get_cdb_name(outprefix string, num_db int, single bool) string {
+	if single {
+		if num_db != 0 {
+			exitOnErr(errors.New("Multiple output in single output mode"))
+		}
+		return fmt.Sprintf("%s.cdb", outprefix)
+	}
 	return fmt.Sprintf("%s.%d.cdb", outprefix, num_db)
 }
 
@@ -30,7 +37,7 @@ func MakeCDB(r *bufio.Reader, outname string) {
 	exitOnErr(outdb.Close())
 	log.Printf("done")
 }
-func Output(r *bufio.Reader, outpath string) {
+func Output(r *bufio.Reader, outpath string, single bool) {
 	var err error = nil
 	var buf bytes.Buffer
 	buf.Grow(4 * (1024 * 1024 * 1024)) //get 4GB
@@ -57,7 +64,7 @@ func Output(r *bufio.Reader, outpath string) {
 		if buf_size+new_line_size > 3.5*(1024*1024*1024) {
 			r := bufio.NewReader(&buf)
 			buf.WriteString("\n")
-			outname := get_cdb_name(outpath, num_db)
+			outname := get_cdb_name(outpath, num_db, single)
 			MakeCDB(r, outname)
 			num_db++
 
@@ -88,20 +95,22 @@ func Output(r *bufio.Reader, outpath string) {
 
 	rbuf := bufio.NewReader(&buf)
 	buf.WriteString("\n")
-	outname := get_cdb_name(outpath, num_db)
+	outname := get_cdb_name(outpath, num_db, single)
 	MakeCDB(rbuf, outname)
 
 	//output keymap
-	outf, err := os.Create(outpath + ".keymap")
-	defer outf.Close()
-	exitOnErr(err)
-	w := bufio.NewWriter(outf)
-	defer w.Flush()
-	for idx, key := range first_keys {
-		w.WriteString(key)
-		w.WriteString(" ")
-		w.WriteString(fmt.Sprintf("%d", idx))
-		w.WriteString("\n")
+	if !single {
+		outf, err := os.Create(outpath + ".keymap")
+		defer outf.Close()
+		exitOnErr(err)
+		w := bufio.NewWriter(outf)
+		defer w.Flush()
+		for idx, key := range first_keys {
+			w.WriteString(key)
+			w.WriteString(" ")
+			w.WriteString(fmt.Sprintf("%d", idx))
+			w.WriteString("\n")
+		}
 	}
 
 }

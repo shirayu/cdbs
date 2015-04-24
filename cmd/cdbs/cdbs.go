@@ -67,9 +67,5 @@ func main() {
 
 	//operate
 	r := bufio.NewReader(inf)
-	if opts.Single {
-		cdbs.MakeCDB(r, opts.Output)
-	} else {
-		cdbs.Output(r, opts.Output)
-	}
+	cdbs.Output(r, opts.Output, opts.Single)
 }

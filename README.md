@@ -12,6 +12,7 @@
 Usage of cdbs:
   -i, -input :  Input file name. - or no designation means STDIN.
   -o, -output: Output file name suffix.
+  --single   : Do not output ``.keymap`` file. Only ouput a single file.
 ```
 
 ## INSTALL
