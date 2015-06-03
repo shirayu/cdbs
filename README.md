@@ -5,7 +5,8 @@
 ## What's this
 
 - This tool converts the input key and value pairs into several CDB files
-- Input SHOULD be sorted by the key, otherwise you can not look up by using several cdbs
+- Input SHOULD be sorted by the key, otherwise you can not look up by using several cdbs with ``Get(key string)``
+    - For unsorted keys, ``BruteGet(key string)`` can be used. Because this searches all CDB files, the efficiency will be down.
 
 ## Usage
 ```

@@ -72,4 +72,14 @@ func TestGet(t *testing.T) {
 			t.Errorf("Expected value [%s] for the key [%v] but got: [%s]", test.value, test.arg, ret)
 		}
 	}
+
+	for _, test := range tests {
+		ret, err := cdbs.BruteGet(test.arg)
+		if test.err != err {
+			t.Errorf("Expected error %v for the key [%v] but got: %v", test.err, test.arg, err)
+		}
+		if test.value != string(ret) {
+			t.Errorf("Expected value [%s] for the key [%v] but got: [%s]", test.value, test.arg, ret)
+		}
+	}
 }
