@@ -5,7 +5,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"github.com/jbarham/go-cdb"
+	"github.com/torbit/cdb"
 	"io"
 	"log"
 	"os"

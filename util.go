@@ -2,7 +2,7 @@ package cdbs
 
 import (
 	"bufio"
-	"github.com/jbarham/go-cdb"
+	"github.com/torbit/cdb"
 	"io"
 	"os"
 	"sort"
@@ -60,13 +60,13 @@ func (self *Cdbs) Get(key string) ([]byte, error) {
 	}
 
 	c := self.cdbs[index]
-	data, err := c.Data([]byte(key))
+	data, err := c.Bytes([]byte(key))
 	return data, err
 }
 
 func (self *Cdbs) BruteGet(key string) ([]byte, error) {
 	for _, c := range self.cdbs {
-		data, err := c.Data([]byte(key))
+		data, err := c.Bytes([]byte(key))
 		if err == nil {
 			return data, err
 		}
