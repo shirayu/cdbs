@@ -23,11 +23,12 @@ func getInputFile(ifname string) (inf *os.File, err error) {
 }
 
 type cmdOptions struct {
-	Help   bool   `short:"h" long:"help" description:"Show this help message"`
-	Input  string `short:"i" long:"input" default:"-"`
-	Output string `short:"o" long:"output"`
-	Single bool   `long:"single" description:"Only output a single CDB file" default:"false"`
-	Log    bool   `long:"log" description:"Enable logging" default:"false"`
+	Help      bool   `short:"h" long:"help" description:"Show this help message"`
+	Input     string `short:"i" long:"input" default:"-"`
+	Output    string `short:"o" long:"output"`
+	Separator string `short:"t" long:"separator" description:"Separator of keys and values" default:"	"`
+	Single    bool   `long:"single" description:"Only output a single CDB file" default:"false"`
+	Log       bool   `long:"log" description:"Enable logging" default:"false"`
 }
 
 func main() {
@@ -35,17 +36,19 @@ func main() {
 	optparser := flags.NewParser(&opts, flags.Default)
 	optparser.Name = "cdbs"
 	optparser.Usage = "-i input -o output [OPTIONS]"
-	optparser.Parse()
-
-	//show help
-	if len(os.Args) == 1 {
-		optparser.WriteHelp(os.Stdout)
-		os.Exit(0)
-	}
-	for _, arg := range os.Args {
-		if arg == "-h" {
-			os.Exit(0)
+	_, err := optparser.Parse()
+	if err != nil {
+		for _, arg := range os.Args {
+			if arg == "-h" {
+				os.Exit(0)
+			}
 		}
+		os.Exit(1)
+	}
+	runes := []rune(opts.Separator)
+	if len(runes) != 1 {
+		log.Printf("The length of separator is not 1")
+		os.Exit(1)
 	}
 
 	if opts.Input == "" || opts.Output == "" {
@@ -67,5 +70,5 @@ func main() {
 
 	//operate
 	r := bufio.NewReader(inf)
-	cdbs.Output(r, opts.Output, opts.Single)
+	cdbs.Output(r, opts.Output, opts.Single, runes[0])
 }

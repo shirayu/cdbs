@@ -37,7 +37,7 @@ func MakeCDB(r *bufio.Reader, outname string) {
 	exitOnErr(outdb.Close())
 	log.Printf("done")
 }
-func Output(r *bufio.Reader, outpath string, single bool) {
+func Output(r *bufio.Reader, outpath string, single bool, separator rune) {
 	var err error = nil
 	var buf bytes.Buffer
 	buf.Grow(4 * (1024 * 1024 * 1024)) //get 4GB
@@ -49,7 +49,7 @@ func Output(r *bufio.Reader, outpath string, single bool) {
 		if err != io.EOF && err != nil {
 			log.Fatal(err)
 		}
-		delm_pos := bytes.IndexRune(line, '\t')
+		delm_pos := bytes.IndexRune(line, separator)
 		//         (line[:len(line)-1], "\t", 2)
 		if delm_pos == -1 {
 			log.Printf("skip an invalid line -> %s", line)
