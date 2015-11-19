@@ -27,6 +27,7 @@ type cmdOptions struct {
 	Input     string `short:"i" long:"input" default:"-"`
 	Output    string `short:"o" long:"output"`
 	Separator string `short:"t" long:"separator" description:"Separator of keys and values" default:"	"`
+	Compress  bool   `short:"z" long:"compress" description:"Compress values in gzip format" default:"false"`
 	Single    bool   `long:"single" description:"Only output a single CDB file" default:"false"`
 	Log       bool   `long:"log" description:"Enable logging" default:"false"`
 }
@@ -70,5 +71,5 @@ func main() {
 
 	//operate
 	r := bufio.NewReader(inf)
-	cdbs.Output(r, opts.Output, opts.Single, runes[0])
+	cdbs.Output(r, opts.Output, opts.Single, runes[0], opts.Compress)
 }
