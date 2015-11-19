@@ -90,7 +90,8 @@ func Output(r *bufio.Reader, outpath string, single bool, separator rune, compre
 			val_size = len(line) - delm_pos - 2
 		}
 		//cdb line format is "+<Size-of-key>,<Size-of-val>:<key>-><val>\n" like "+3,4:tom->baby\n"
-		new_line_size := delm_pos + val_size + 5 + Get_digit_num(delm_pos) + Get_digit_num(val_size)
+		//add 6 for these characters:  +,:->\n
+		new_line_size := delm_pos + val_size + 6 + Get_digit_num(delm_pos) + Get_digit_num(val_size)
 
 		//if the buffer size will exceed 3.5GB, make DB before adding the new line
 		if buf_size+new_line_size > 3.5*(1024*1024*1024) {
