@@ -17,7 +17,7 @@ Usage of cdbs:
   -z, --compress:   Compress values in gzip format (deault: false)
   --single:     Only output a single CDB file (deault: false)
   --log:        Enable logging (deault: false)
-``
+```
 
 ## INSTALL
 
