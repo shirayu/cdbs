@@ -37,7 +37,17 @@ func MakeCDB(r *bufio.Reader, outname string) {
 	exitOnErr(outdb.Close())
 	log.Printf("done")
 }
-func Output(r *bufio.Reader, outpath string, single bool, separator rune) {
+func Get_digit_num(num int) int {
+	num = num / 10
+	digit := 1
+	for num != 0 {
+		num = num / 10
+		digit += 1
+	}
+	return digit
+}
+
+func Output(r *bufio.Reader, outpath string, single bool, separator rune, compress bool) {
 	var err error = nil
 	var buf bytes.Buffer
 	buf.Grow(4 * (1024 * 1024 * 1024)) //get 4GB
@@ -57,8 +67,17 @@ func Output(r *bufio.Reader, outpath string, single bool, separator rune) {
 			continue
 		}
 
-		//cdb line format is "+<Size-of-key>,<Size-of-val>:<key>-><val>\n" like "+3,4:tom->baby\n"
-		new_line_size := len(line) + 20 //+ , : =>
+		//Get value expression
+		var val_and_ln_byte []byte
+		var val_size int
+		var new_line_size int
+		if compress {
+		} else {
+			val_and_ln_byte = line[delm_pos+1:]
+			val_size = len(line) - delm_pos - 2
+			//cdb line format is "+<Size-of-key>,<Size-of-val>:<key>-><val>\n" like "+3,4:tom->baby\n"
+			new_line_size = len(line) + 5 + Get_digit_num(delm_pos) + Get_digit_num(val_size) //+ , : =>
+		}
 
 		//if the buffer size will exceed 3.5GB, make DB before adding the new line
 		if buf_size+new_line_size > 3.5*(1024*1024*1024) {
@@ -80,14 +99,12 @@ func Output(r *bufio.Reader, outpath string, single bool, separator rune) {
 		}
 		buf_size += new_line_size
 
-		val_size := len(line) - delm_pos - 2
 		head_line := fmt.Sprintf("+%d,%d:", delm_pos, val_size)
 		buf.WriteString(head_line)
 		key_byte := line[:delm_pos]
 		buf.Write(key_byte)
 		buf.WriteRune('-')
 		buf.WriteRune('>')
-		val_and_ln_byte := line[delm_pos+1:]
 		buf.Write(val_and_ln_byte)
 
 		line, err = r.ReadBytes('\n') //next
