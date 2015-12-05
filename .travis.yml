@@ -11,7 +11,7 @@ before_install:
     - go get github.com/torbit/cdb
 
 script:
-    - $HOME/gopath/bin/goveralls -repotoken bxOLfRVZ3qtAkjOntFicuSVZvZmAmsK3P
+    - $HOME/gopath/bin/goveralls -service=travis-ci
 
 install:
     - go get -d -v ./...
