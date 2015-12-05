@@ -3,6 +3,7 @@
 
 [![Build Status](https://travis-ci.org/shirayu/cdbs.svg?branch=master)](https://travis-ci.org/shirayu/cdbs)
 [![Coverage Status](https://coveralls.io/repos/shirayu/cdbs/badge.png)](https://coveralls.io/r/shirayu/cdbs)
+[![GoDoc](https://godoc.org/github.com/shirayu/cdbs?status.svg)](https://godoc.org/github.com/shirayu/cdbs)
 [![LGPLv3](https://img.shields.io/badge/license-LGPLv3-blue.svg)](LGPLv3)
 [![BSD](https://img.shields.io/badge/license-BSD-blue.svg)](BSD)
 
