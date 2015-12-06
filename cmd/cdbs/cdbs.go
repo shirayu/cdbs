@@ -38,7 +38,11 @@ func main() {
 	optparser.Name = "cdbs"
 	optparser.Usage = "-i input -o output [OPTIONS]"
 	_, err := optparser.Parse()
-	if err != nil {
+
+	if len(os.Args) == 1 {
+		optparser.WriteHelp(os.Stdout)
+		os.Exit(0)
+	} else if err != nil {
 		for _, arg := range os.Args {
 			if arg == "-h" {
 				os.Exit(0)
@@ -46,6 +50,7 @@ func main() {
 		}
 		os.Exit(1)
 	}
+
 	runes := []rune(opts.Separator)
 	if len(runes) != 1 {
 		log.Printf("The length of separator is not 1")
