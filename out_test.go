@@ -18,7 +18,7 @@ func TestDigit(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		if Get_digit_num(test.num) != test.digit {
+		if GetDigitNum(test.num) != test.digit {
 			t.Errorf("Expected %d but got: %d", test.digit, test.num)
 		}
 	}

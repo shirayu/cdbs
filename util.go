@@ -9,12 +9,14 @@ import (
 	"strings"
 )
 
+//Cdbs handles several CDB files
 type Cdbs struct {
 	prefix string
 	cdbs   []*cdb.Cdb
 	names  []string
 }
 
+//NewCdbs returns Cdbs
 func NewCdbs(prefix string) (*Cdbs, error) {
 	self := new(Cdbs)
 	self.prefix = prefix
@@ -48,24 +50,26 @@ func NewCdbs(prefix string) (*Cdbs, error) {
 	return self, nil
 }
 
-func (self *Cdbs) Get(key string) ([]byte, error) {
-	index := sort.SearchStrings(self.names, key)
-	if index >= len(self.names) {
+//Get returns a value by binary search
+func (cs *Cdbs) Get(key string) ([]byte, error) {
+	index := sort.SearchStrings(cs.names, key)
+	if index >= len(cs.names) {
 		index--
-	} else if self.names[index] != key {
+	} else if cs.names[index] != key {
 		index--
 	}
 	if index < 0 {
 		index = 0
 	}
 
-	c := self.cdbs[index]
+	c := cs.cdbs[index]
 	data, err := c.Bytes([]byte(key))
 	return data, err
 }
 
-func (self *Cdbs) BruteGet(key string) ([]byte, error) {
-	for _, c := range self.cdbs {
+//BruteGet returns a value by linear search
+func (cs *Cdbs) BruteGet(key string) ([]byte, error) {
+	for _, c := range cs.cdbs {
 		data, err := c.Bytes([]byte(key))
 		if err == nil {
 			return data, err

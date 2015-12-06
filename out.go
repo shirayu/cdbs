@@ -18,16 +18,17 @@ func exitOnErr(err error) {
 	}
 }
 
-func get_cdb_name(outprefix string, num_db int, single bool) string {
+func getCdbName(outprefix string, numDB int, single bool) string {
 	if single {
-		if num_db != 0 {
+		if numDB != 0 {
 			exitOnErr(errors.New("Multiple output in single output mode"))
 		}
 		return fmt.Sprintf("%s.cdb", outprefix)
 	}
-	return fmt.Sprintf("%s.%d.cdb", outprefix, num_db)
+	return fmt.Sprintf("%s.%d.cdb", outprefix, numDB)
 }
 
+//MakeCDB creates single CDB file with given buffer
 func MakeCDB(r *bufio.Reader, outname string) {
 	log.Printf("Making %s", outname)
 	outdb, err := os.OpenFile(outname, os.O_RDWR|os.O_CREATE, 0644)
@@ -38,43 +39,46 @@ func MakeCDB(r *bufio.Reader, outname string) {
 	exitOnErr(outdb.Close())
 	log.Printf("done")
 }
-func Get_digit_num(num int) int {
+
+//GetDigitNum returns the number of digit for the given number
+func GetDigitNum(num int) int {
 	num = num / 10
 	digit := 1
 	for num != 0 {
 		num = num / 10
-		digit += 1
+		digit++
 	}
 	return digit
 }
 
+//Output crests CDB files
 func Output(r *bufio.Reader, outpath string, single bool, separator rune, compress bool) {
-	var err error = nil
+	var err error
 	var buf bytes.Buffer
 	buf.Grow(4 * (1024 * 1024 * 1024)) //get 4GB
-	first_keys := []string{}
-	buf_size := 0
-	num_db := 0
+	firstKeys := []string{}
+	bufSize := 0
+	numDB := 0
 	line, err := r.ReadBytes('\n') //first
 	for err != io.EOF {
 		if err != io.EOF && err != nil {
 			log.Fatal(err)
 		}
-		delm_pos := bytes.IndexRune(line, separator)
+		delmPos := bytes.IndexRune(line, separator)
 		//         (line[:len(line)-1], "\t", 2)
-		if delm_pos == -1 {
+		if delmPos == -1 {
 			log.Printf("skip an invalid line -> %s", line)
 			line, err = r.ReadBytes('\n') //next
 			continue
 		}
 
 		//Get value expression
-		var val_byte []byte
-		var val_size int
+		var valByte []byte
+		var valSize int
 		if compress {
 			var b bytes.Buffer
 			gz := gzip.NewWriter(&b)
-			if _, err := gz.Write(line[delm_pos+1 : len(line)-1]); err != nil {
+			if _, err := gz.Write(line[delmPos+1 : len(line)-1]); err != nil {
 				log.Fatal(err)
 			}
 			if err := gz.Flush(); err != nil {
@@ -83,43 +87,43 @@ func Output(r *bufio.Reader, outpath string, single bool, separator rune, compre
 			if err := gz.Close(); err != nil {
 				log.Fatal(err)
 			}
-			val_byte = b.Bytes()
-			val_size = len(val_byte)
+			valByte = b.Bytes()
+			valSize = len(valByte)
 		} else {
-			val_byte = line[delm_pos+1 : len(line)-1]
-			val_size = len(line) - delm_pos - 2
+			valByte = line[delmPos+1 : len(line)-1]
+			valSize = len(line) - delmPos - 2
 		}
 		//cdb line format is "+<Size-of-key>,<Size-of-val>:<key>-><val>\n" like "+3,4:tom->baby\n"
 		//add 6 for these characters:  +,:->\n
-		new_line_size := delm_pos + val_size + 6 + Get_digit_num(delm_pos) + Get_digit_num(val_size)
+		newLineSize := delmPos + valSize + 6 + GetDigitNum(delmPos) + GetDigitNum(valSize)
 
 		//if the buffer size will exceed 3.5GB, make DB before adding the new line
-		if buf_size+new_line_size > 3.5*(1024*1024*1024) {
+		if bufSize+newLineSize > 3.5*(1024*1024*1024) {
 			r := bufio.NewReader(&buf)
 			buf.WriteString("\n")
-			outname := get_cdb_name(outpath, num_db, single)
+			outname := getCdbName(outpath, numDB, single)
 			MakeCDB(r, outname)
-			num_db++
+			numDB++
 
 			//clear
-			buf_size = 0
+			bufSize = 0
 			buf.Reset()
 			//             debug.FreeOSMemory()
 		}
 
-		if buf_size == 0 {
-			key := string(line[:delm_pos])
-			first_keys = append(first_keys, key)
+		if bufSize == 0 {
+			key := string(line[:delmPos])
+			firstKeys = append(firstKeys, key)
 		}
-		buf_size += new_line_size
+		bufSize += newLineSize
 
-		head_line := fmt.Sprintf("+%d,%d:", delm_pos, val_size)
-		buf.WriteString(head_line)
-		key_byte := line[:delm_pos]
-		buf.Write(key_byte)
+		headLine := fmt.Sprintf("+%d,%d:", delmPos, valSize)
+		buf.WriteString(headLine)
+		keyByte := line[:delmPos]
+		buf.Write(keyByte)
 		buf.WriteRune('-')
 		buf.WriteRune('>')
-		buf.Write(val_byte)
+		buf.Write(valByte)
 		buf.WriteRune('\n')
 
 		line, err = r.ReadBytes('\n') //next
@@ -127,7 +131,7 @@ func Output(r *bufio.Reader, outpath string, single bool, separator rune, compre
 
 	rbuf := bufio.NewReader(&buf)
 	buf.WriteString("\n")
-	outname := get_cdb_name(outpath, num_db, single)
+	outname := getCdbName(outpath, numDB, single)
 	MakeCDB(rbuf, outname)
 
 	//output keymap
@@ -137,7 +141,7 @@ func Output(r *bufio.Reader, outpath string, single bool, separator rune, compre
 		exitOnErr(err)
 		w := bufio.NewWriter(outf)
 		defer w.Flush()
-		for idx, key := range first_keys {
+		for idx, key := range firstKeys {
 			w.WriteString(key)
 			w.WriteString(" ")
 			w.WriteString(fmt.Sprintf("%d", idx))
