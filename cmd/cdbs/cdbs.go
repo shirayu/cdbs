@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"fmt"
 	"github.com/jessevdk/go-flags"
 	"github.com/shirayu/cdbs"
 	"io/ioutil"
@@ -23,14 +24,18 @@ func getInputFile(ifname string) (inf *os.File, err error) {
 }
 
 type cmdOptions struct {
-	Help      bool   `short:"h" long:"help" description:"Show this help message"`
 	Input     string `short:"i" long:"input" default:"-"`
 	Output    string `short:"o" long:"output"`
 	Separator string `short:"t" long:"separator" description:"Separator of keys and values" default:"	"`
 	Compress  bool   `short:"z" long:"compress" description:"Compress values in gzip format" default:"false"`
 	Single    bool   `long:"single" description:"Only output a single CDB file" default:"false"`
 	Log       bool   `long:"log" description:"Enable logging" default:"false"`
+
+	Version bool `short:"v" long:"version" description:"Show version"`
 }
+
+var Version = "Unknown version"
+var VersionDate = ""
 
 func main() {
 	opts := cmdOptions{}
@@ -49,6 +54,13 @@ func main() {
 			}
 		}
 		os.Exit(1)
+	} else if opts.Version {
+		if len(VersionDate) != 0 {
+			fmt.Fprintf(os.Stderr, "%s: %s on %s\n", optparser.Name, Version, VersionDate)
+		} else {
+			fmt.Fprintf(os.Stderr, "%s: %s\n", optparser.Name, Version)
+		}
+		os.Exit(0)
 	}
 
 	runes := []rune(opts.Separator)
