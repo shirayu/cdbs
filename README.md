@@ -14,6 +14,7 @@
 - This tool converts the input key and value pairs into several CDB files
 - Input SHOULD be sorted by the key, otherwise you can not look up by using several cdbs with ``Get(key string)``
     - For unsorted keys, ``BruteGet(key string)`` can be used. Because this searches all CDB files, the efficiency will be down.
+- Currently works only on 64 bit environments
 
 ## Usage
 ```
@@ -28,14 +29,11 @@ Usage of cdbs:
 
 ## INSTALL
 
-```
-go get github.com/shirayu/cdbs/cmd/cdbs
-```
-
+- To install binary: two options. (select one)
+    - Download from [github release page](https://github.com/shirayu/cdbs/releases)
+    - ``go get github.com/shirayu/cdbs/cmd/cdbs``
 - To install library
-```
-go get github.com/shirayu/cdbs
-```
+    - ``go get github.com/shirayu/cdbs``
 
 ## Acknowledgement
 
