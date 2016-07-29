@@ -2,21 +2,22 @@ package main
 
 import (
 	"fmt"
-	"github.com/jessevdk/go-flags"
-	"github.com/shirayu/cdbs"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
 	"runtime"
 	"strings"
+
+	"github.com/jessevdk/go-flags"
+	"github.com/shirayu/cdbs"
 )
 
 type cmdOptions struct {
 	Help  bool   `short:"h" long:"help" description:"Show this help message"`
 	Input string `short:"i" long:"input" required:"true"`
 	Port  int    `short:"p" long:"port" default:"8000" description:"Port number to serve"`
-	NoLog bool   `long:"nolog" description:"Disable logging" default:"false"`
+	NoLog bool   `long:"nolog" description:"Disable logging"`
 }
 
 func accessLog(handler http.Handler) http.Handler {
@@ -88,13 +89,13 @@ func main() {
 		optparser.WriteHelp(os.Stdout)
 		os.Exit(0)
 	}
-	for _, arg := range os.Args {
-		if arg == "-h" {
+	if err != nil {
+		if e, ok := err.(*flags.Error); !ok {
+			log.Fatalf("Expected flags.Error, but got %T", err)
+		} else if e.Type == flags.ErrHelp {
 			os.Exit(0)
 		}
-	}
-	if err != nil {
-		os.Exit(1)
+		log.Fatalf("%s\n", err)
 	}
 
 	if opts.NoLog {
