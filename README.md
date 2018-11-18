@@ -1,7 +1,7 @@
 
 # cdbs
 
-[![Build Status](https://travis-ci.org/shirayu/cdbs.svg?branch=master)](https://travis-ci.org/shirayu/cdbs)
+[![CircleCI](https://circleci.com/gh/shirayu/cdbs.svg?style=svg)](https://circleci.com/gh/shirayu/cdbs)
 [![codecov.io](https://codecov.io/github/shirayu/cdbs/coverage.svg?branch=master)](https://codecov.io/github/shirayu/cdbs?branch=master)
 [![Report card](http://goreportcard.com/badge/shirayu/cdbs)](http://goreportcard.com/report/shirayu/cdbs)
 [![GoDoc](https://godoc.org/github.com/shirayu/cdbs?status.svg)](https://godoc.org/github.com/shirayu/cdbs)
