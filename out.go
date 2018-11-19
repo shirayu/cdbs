@@ -6,10 +6,11 @@ import (
 	"compress/gzip"
 	"errors"
 	"fmt"
-	"github.com/torbit/cdb"
 	"io"
 	"log"
 	"os"
+
+	"github.com/torbit/cdb"
 )
 
 func exitOnErr(err error) {
@@ -57,7 +58,7 @@ func Output(r *bufio.Reader, outpath string, single bool, separator rune, compre
 	var buf bytes.Buffer
 	buf.Grow(4 * (1024 * 1024 * 1024)) //get 4GB
 	firstKeys := []string{}
-	bufSize := 0
+	cdbSize := 2048
 	numDB := 0
 	line, err := r.ReadBytes('\n') //first
 	for err != io.EOF {
@@ -93,12 +94,11 @@ func Output(r *bufio.Reader, outpath string, single bool, separator rune, compre
 			valByte = line[delmPos+1 : len(line)-1]
 			valSize = len(line) - delmPos - 2
 		}
-		//cdb line format is "+<Size-of-key>,<Size-of-val>:<key>-><val>\n" like "+3,4:tom->baby\n"
-		//add 6 for these characters:  +,:->\n
-		newLineSize := delmPos + valSize + 6 + GetDigitNum(delmPos) + GetDigitNum(valSize)
+		// 24 bytes per record, plus the space for keys and data
+		newEntrySize := delmPos + valSize + 24
 
-		//if the buffer size will exceed 3.5GB, make DB before adding the new line
-		if bufSize+newLineSize > 3.5*(1024*1024*1024) {
+		//if the CDB size will exceed 3.8GB, make DB before adding the new line
+		if cdbSize+newEntrySize > 3900*1024*1024 {
 			r := bufio.NewReader(&buf)
 			buf.WriteString("\n")
 			outname := getCdbName(outpath, numDB, single)
@@ -106,16 +106,16 @@ func Output(r *bufio.Reader, outpath string, single bool, separator rune, compre
 			numDB++
 
 			//clear
-			bufSize = 0
+			cdbSize = 0
 			buf.Reset()
 			//             debug.FreeOSMemory()
 		}
 
-		if bufSize == 0 {
+		if cdbSize == 0 {
 			key := string(line[:delmPos])
 			firstKeys = append(firstKeys, key)
 		}
-		bufSize += newLineSize
+		cdbSize += newEntrySize
 
 		headLine := fmt.Sprintf("+%d,%d:", delmPos, valSize)
 		buf.WriteString(headLine)
