@@ -58,7 +58,8 @@ func Output(r *bufio.Reader, outpath string, single bool, separator rune, compre
 	var buf bytes.Buffer
 	buf.Grow(4 * (1024 * 1024 * 1024)) //get 4GB
 	firstKeys := []string{}
-	cdbSize := 2048
+	const minimumCdbSize = 2046
+	cdbSize := minimumCdbSize
 	numDB := 0
 	line, err := r.ReadBytes('\n') //first
 	for err != io.EOF {
@@ -106,12 +107,12 @@ func Output(r *bufio.Reader, outpath string, single bool, separator rune, compre
 			numDB++
 
 			//clear
-			cdbSize = 0
+			cdbSize = minimumCdbSize
 			buf.Reset()
 			//             debug.FreeOSMemory()
 		}
 
-		if cdbSize == 0 {
+		if cdbSize == minimumCdbSize {
 			key := string(line[:delmPos])
 			firstKeys = append(firstKeys, key)
 		}
