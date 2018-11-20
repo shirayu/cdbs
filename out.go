@@ -41,17 +41,6 @@ func MakeCDB(r *bufio.Reader, outname string) {
 	log.Printf("done")
 }
 
-//GetDigitNum returns the number of digit for the given number
-func GetDigitNum(num int) int {
-	num = num / 10
-	digit := 1
-	for num != 0 {
-		num = num / 10
-		digit++
-	}
-	return digit
-}
-
 //Output crests CDB files
 func Output(r *bufio.Reader, outpath string, single bool, separator rune, compress bool) {
 	var err error
