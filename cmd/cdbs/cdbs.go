@@ -31,6 +31,7 @@ type cmdOptions struct {
 	Compress  bool   `short:"z" long:"compress" description:"Compress values in gzip format"`
 	Single    bool   `long:"single" description:"Only output a single CDB file"`
 	Log       bool   `long:"log" description:"Enable logging"`
+	Limit     int    `long:"lmit" description:"Limit size of one CDB file" default:"4089446400"`
 
 	Version bool `short:"v" long:"version" description:"Show version"`
 }
@@ -92,5 +93,5 @@ func main() {
 
 	//operate
 	r := bufio.NewReader(inf)
-	cdbs.Output(r, opts.Output, opts.Single, runes[0], opts.Compress)
+	cdbs.Output(r, opts.Output, opts.Single, runes[0], opts.Compress, opts.Limit)
 }

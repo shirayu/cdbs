@@ -42,7 +42,7 @@ func MakeCDB(r *bufio.Reader, outname string) {
 }
 
 //Output crests CDB files
-func Output(r *bufio.Reader, outpath string, single bool, separator rune, compress bool) {
+func Output(r *bufio.Reader, outpath string, single bool, separator rune, compress bool, limit int) {
 	var err error
 	var buf bytes.Buffer
 	buf.Grow(4 * (1024 * 1024 * 1024)) //get 4GB
@@ -87,8 +87,8 @@ func Output(r *bufio.Reader, outpath string, single bool, separator rune, compre
 		// 24 bytes per record, plus the space for keys and data
 		newEntrySize := delmPos + valSize + 24
 
-		//if the CDB size will exceed 3.8GB, make DB before adding the new line
-		if cdbSize+newEntrySize > 3900*1024*1024 {
+		//if the CDB size will exceed the given file size, make DB before adding the new line
+		if cdbSize+newEntrySize > limit {
 			r := bufio.NewReader(&buf)
 			buf.WriteString("\n")
 			outname := getCdbName(outpath, numDB, single)
